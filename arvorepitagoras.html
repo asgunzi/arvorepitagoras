@@ -1,0 +1,172 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+
+<title>Forgotten Math</title>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<link rel="stylesheet" type="text/css"  href="../estilo_menu.css"/>
+
+<style>  
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="menu"></div>
+
+<a href = "../index.html"> <p id="Logo"></p> </a>
+<h1>A árvore de Pitágoras</h1>
+
+
+<div class="slidecontainer" onchange= "Desenhar()">
+  N. Pontos
+  <input type="range" min="1" max="6" value="3" class="slider" id="rngPontos">
+
+  Ângulo
+  <input type="range" min="30" max="60" value="45" class="slider" id="rngAngulo">
+  
+</div>
+
+<p id = "svgArv"></p>
+
+<br>
+<hr>
+<p>By: Arnaldo Gunzi</p>
+
+
+
+<p>Veja também:</p>
+
+<p><a href="https://asgunzi.neocities.org">Forgotten Math</a></p>
+
+
+<p><a href = "https://ideiasesquecidas.com/"> Forgotten Lore - Ideias Técnicas com uma pitada de filosofia. </a></p>
+
+<script src="../criaMenuL1.js"></script>
+<script src = "../LogoMath.js">		</script>
+
+<script>
+
+    var svg = d3.select("#svgArv")
+        .append("svg")
+        .attr("width", 1200)
+        .attr("height", 800);
+   
+	var countMax;
+
+
+	Desenhar();
+	
+	function RegularPol(x,y,lado, n, ang0,corRef)
+	{
+		//Posicao x, y
+		//Raio R
+		//Número de pontos n
+		var pontos;
+		var i;
+		var angulo;
+		var R;
+		
+		
+		R  = lado *0.7071;
+		angulo=0;
+		pontos="";
+		for (i=0;i<n-1;i++)
+		{ 
+			angulo = i*2*3.141592/n +(ang0+45)*3.141592/180;
+			pontos += (x + Math.sin(angulo)*R)+ ", " + (y+Math.cos(angulo)*R) + ", "; 
+		}
+
+		//Ultimo ponto
+		i = n-1;
+		angulo = i*2*3.141592/n+(ang0+45)*3.141592/180; 
+		pontos += (x + Math.sin(angulo)*R)+ ", " + (y+Math.cos(angulo)*R);
+		 
+		svg.append("polygon")
+		  .attr("points", pontos)   
+		  .attr("stroke", "black")
+		  .attr("fill", corRef);       
+	}
+
+	function desenhaReta(xa,ya,xb,yb,cor, width)
+	{
+		svg.append('line')		  
+		  .attr('x1', xa)
+		  .attr('y1', ya)
+		  .attr('x2', xb)
+		  .attr('y2', yb)
+		  .attr('class', 'apoio')
+		  .attr('stroke', cor)
+		  .attr('fill', cor)
+		  .attr('stroke-width', width);
+	}
+
+
+	function arvore(x0, y0, larg, ang0, count,cor,theta)
+	{
+		var x1;
+		var y1;
+
+		var x2;
+		var y2;
+		var x3;
+		var y3;
+		var cor1;
+		var h;
+		var p;
+		
+		h = Math.tan(theta*3.141592/180)*larg/2;
+		p = Math.sqrt(h*h/4 + larg*larg/16);
+		
+		//Final do primeiro quadrado
+		x1 = x0 + larg*Math.cos(ang0*3.141592/180);
+		y1 = y0 - larg*Math.sin(ang0*3.141592/180);
+
+		//Início dos próximos quadrados
+		x2 = x1 + p*Math.cos((ang0+theta-90)*3.141592/180);
+		y2 = y1 - p*Math.sin((ang0+theta-90)*3.141592/180);
+
+		x3 = x1 + p*Math.cos(((ang0+theta-90)+180-2*theta)*3.141592/180);
+		y3 = y1 - p*Math.sin(((ang0+theta-90)+180-2*theta)*3.141592/180);
+		
+		//Desenha quadrado
+		//cor = 'transparent';
+		RegularPol((x0+x1)/2,(y0+y1)/2,larg, 4,ang0,cor);
+		
+		//Retas de apoio para debug
+		//desenhaReta(x1,y1,x2,y2,"darkblue", 1);
+		//desenhaReta(x1,y1,x3,y3,"darkblue", 1);		
+		
+		//Chama próximos dois ramos
+		if (count<countMax)
+		{	
+			cor1 = d3.schemeCategory20[count];
+			arvore(x2, y2, larg/(2*Math.cos(theta*3.141592/180)), ang0-theta, count+1,cor1,theta);
+			arvore(x3, y3, larg/(2*Math.cos(theta*3.141592/180)), ang0+theta, count+1,cor1,theta);
+		}
+	}
+	
+	function Desenhar()
+	{
+	
+	var i;
+	var j;
+	
+	svg.selectAll("*").remove();
+	countMax = parseInt(d3.select("#rngPontos").property("value"));
+	
+	var angtheta= parseInt(d3.select("#rngAngulo").property("value"));
+	
+	//Plota retas	
+	arvore(400,500,100,90, 1, d3.schemeCategory20[0], angtheta);
+	
+	}
+
+</script>
+</body>
+</html>
